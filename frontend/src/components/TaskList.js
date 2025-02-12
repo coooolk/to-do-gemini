@@ -1,5 +1,5 @@
 // frontend/src/components/TaskList.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import axios from 'axios';
 import { motion } from 'framer-motion';
@@ -104,7 +104,22 @@ const CreatedDateText = styled.span`
     margin-top: 2px;
 `;
 
-function TaskList({ tasksUpdatedFlag, categoryFilter, onCategoryUpdated, sortOption }) {
+const DeleteAllButton = styled.button`
+    background-color: #ff6f61; /* Example red color */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+    &:hover {
+        background-color: #e0524a;
+    }
+`;
+
+function TaskList({ tasksUpdatedFlag, categoryFilter, onCategoryUpdated, sortOption, onDeleteAllTasks }) {
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
@@ -135,7 +150,40 @@ function TaskList({ tasksUpdatedFlag, categoryFilter, onCategoryUpdated, sortOpt
     }
   };
 
-  const handleCompleteToggle = async (task) => {
+
+  const handleDeleteAllTasks = useCallback(async () => {
+    console.log("handleDeleteAllTasks: Function called");
+    if (window.confirm("Are you sure you want to delete all tasks? This action cannot be undone.")) {
+      try {
+        console.log("handleDeleteAllTasks: Confirmation accepted, sending DELETE request");
+        const response = await axios.delete('/api/tasks/clear');
+        console.log("handleDeleteAllTasks: DELETE request completed");
+        console.log("handleDeleteAllTasks: Response status:", response.status);
+        console.log("handleDeleteAllTasks: Response data:", response.data);
+
+        if (response.status >= 200 && response.status < 300) { // Explicitly check for 2xx success status
+          console.log("handleDeleteAllTasks: Success status detected (2xx)");
+          fetchTasks(); // Refresh task list after deletion
+          onDeleteAllTasks(); // Call onDeleteAllTasks prop if needed
+          console.log("handleDeleteAllTasks: fetchTasks and onDeleteAllTasks called");
+        } else {
+          // This *shouldn't* happen with axios on 2xx, but for robustness, handle non-2xx explicitly
+          console.error("handleDeleteAllTasks: Backend responded with non-success status, should not reach here with axios success. Status:", response.status);
+          alert("Unexpected issue deleting tasks (non-200 status). Please check console.");
+        }
+
+
+      } catch (error) {
+        console.error("handleDeleteAllTasks: ERROR caught in try-catch block");
+        console.error("handleDeleteAllTasks: Error object:", error);
+        alert("Failed to delete all tasks due to an error. Please check console.");
+      }
+    } else {
+      console.log("handleDeleteAllTasks: Confirmation cancelled by user");
+    }
+  }, [fetchTasks, onDeleteAllTasks]);
+
+    const handleCompleteToggle = async (task) => {
     try {
       await axios.put(`/api/tasks/${task._id}`, { completed: !task.completed, priority: task.priority });
       fetchTasks();
@@ -190,6 +238,10 @@ function TaskList({ tasksUpdatedFlag, categoryFilter, onCategoryUpdated, sortOpt
 
             </TaskItem>
         ))}
+
+<DeleteAllButton onClick={handleDeleteAllTasks}>
+    Delete All Tasks
+</DeleteAllButton>
     </TaskListContainer>
 );
 }

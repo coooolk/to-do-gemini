@@ -98,6 +98,18 @@ app.post('/api/tasks', async (req, res) => {
         res.status(500).json({ message: "Failed to create task" });
     }
 });
+
+
+// DELETE endpoint to clear all tasks
+app.delete('/api/tasks/clear', async (req, res) => {
+        try {
+            const result = await db.collection(TASKS_COLLECTION).deleteMany({}); // deleteMany with empty filter deletes all
+            res.status(200).json({ message: `Successfully deleted ${result.deletedCount} tasks` });
+        } catch (error) {
+            console.error("Error clearing tasks", error);
+            res.status(500).json({ message: "Failed to clear tasks" });
+        }
+    });
  
  // PUT (Update) task completion status and now ALSO priority (MODIFY to accept 'priority' update)
  app.put('/api/tasks/:id', async (req, res) => {
@@ -132,6 +144,16 @@ app.delete('/api/tasks/:id', async (req, res) => {
     } catch (err) {
         console.error("Error deleting task", err);
         res.status(500).json({ message: "Failed to delete task" });
+    }
+});
+
+app.delete('/api/tasks/clear', async (req, res) => {
+    try {
+        const result = await db.collection(TASKS_COLLECTION).deleteMany({}); // deleteMany with empty filter deletes all
+        res.status(200).json({ message: `Successfully deleted ${result.deletedCount} tasks` });
+    } catch (error) {
+        console.error("Error clearing tasks", error);
+        res.status(500).json({ message: "Failed to clear tasks" });
     }
 });
 

@@ -127,11 +127,12 @@ function App() {
 
         <TaskForm onTaskAdded={handleTaskUpdated} onCategoryUpdated={handleCategoryUpdated} />
         {/* Pass selectedSortOption to TaskList */}
-        <TaskList
-          tasksUpdatedFlag={tasksUpdated}
-          categoryFilter={selectedCategoryFilter}
-          onCategoryUpdated={handleCategoryUpdated}
-          sortOption={selectedSortOption} // Pass sortOption prop to TaskList
+        <TaskList // Render TaskList only once
+            tasksUpdatedFlag={tasksUpdated}
+            categoryFilter={selectedCategoryFilter} // Pass categoryFilter
+            onCategoryUpdated={handleCategoryUpdated} // Pass onCategoryUpdated
+            sortOption={selectedSortOption} // Pass sortOption
+            onDeleteAllTasks={handleTaskUpdated} // Pass onDeleteAllTasks
         />
       </AppContainer>
     </ThemeProvider>
