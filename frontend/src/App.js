@@ -22,7 +22,7 @@ const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 80px;
 `;
 
 const Title = styled.h1`
